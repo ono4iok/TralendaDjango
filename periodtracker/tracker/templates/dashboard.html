@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Period Tracker Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f5f7fa; }
+        .sidebar { background-color: #1f2a38; min-height: 100vh; color: white; padding-top: 20px; }
+        .sidebar a { color: white; display: block; padding: 12px 20px; margin-bottom: 5px; text-decoration: none; border-radius: 6px; transition: 0.2s; }
+        .sidebar a:hover { background-color: #273645; }
+        .content { padding: 30px; }
+        .card-hover:hover { transform: translateY(-5px); transition: 0.3s; box-shadow: 0 10px 20px rgba(0,0,0,0.12); }
+        .stats-card { border-left: 5px solid #e83e8c; }
+        .period-badge { font-size: 0.8rem; padding: 4px 8px; border-radius: 5px; background-color: #e83e8c; color: white; }
+        .featured { background-color: #fff0f6; border: 1px solid #f5c2e7; }
+    </style>
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row">
+
+        <!-- Sidebar -->
+        <div class="col-md-2 sidebar d-flex flex-column">
+            <h4 class="text-center mb-4">Tralenda</h4>
+            <a href="{% url 'dashboard' %}">Home</a>
+            <a href="{% url 'add_cycle' %}">Add New Cycle</a>
+            <a href="#">Period History</a>
+            <a href="#">Fertility Stats</a>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-10 content">
+            <h2 class="mb-4">Dashboard</h2>
+            <div class="d-flex justify-content-end mb-3">
+                <form action="{% url 'reset_cycles' %}" method="POST">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Reset All Cycles</button>
+                </form>
+            </div>
+            
+
+            {% comment %} Stats Cards {% endcomment %}
+            <div class="row mb-4">
+                <div class="col-md-3 mb-3">
+                    <div class="card stats-card p-3 shadow-sm">
+                        <h6>Total Cycles</h6>
+                        <h3>{{ cycles.count }}</h3>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card stats-card p-3 shadow-sm border-success">
+                        <h6>Next Period</h6>
+                        <h5>{{ next_period }}</h5>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card stats-card p-3 shadow-sm border-warning">
+                        <h6>Ovulation Day</h6>
+                        <h5>{{ ovulation }}</h5>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card stats-card p-3 shadow-sm border-info">
+                        <h6>Fertile Window</h6>
+                        <h5>{{ fertile_start }} → {{ fertile_end }}</h5>
+                    </div>
+                </div>
+            </div>
+
+            {% comment %} Featured Cycle {% endcomment %}
+            {% if latest %}
+            <div class="card featured mb-4 shadow-sm">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="card-title">Latest Cycle</h5>
+                        <p class="card-text"><strong>Last Period:</strong> {{ latest.last_period_date }}</p>
+                        <p class="card-text"><strong>Cycle Length:</strong> {{ latest.cycle_length }} days</p>
+                        <p class="card-text"><strong>Next Period:</strong> {{ next_period }}</p>
+                        <p class="card-text"><strong>Ovulation Day:</strong> {{ ovulation }}</p>
+                        <p class="card-text"><strong>Fertile Window:</strong> {{ fertile_start }} → {{ fertile_end }}</p>
+                    </div>
+                    <div>
+                        <span class="period-badge">Latest</span>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% comment %} All Cycles Grid {% endcomment %}
+            <h4 class="mb-3">All Cycles</h4>
+            <div class="row">
+                {% for cycle in cycles %}
+                <div class="col-md-4 mb-3">
+                    <div class="card card-hover h-100 shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ cycle.last_period_date }}</h5>
+                            <p class="card-text"><strong>Cycle Length:</strong> {{ cycle.cycle_length }} days</p>
+                            <p class="card-text"><strong>Next Period:</strong> {{ cycle.next_period }}</p>
+                            <p class="card-text"><strong>Ovulation Day:</strong> {{ cycle.ovulation_day }}</p>
+                            <p class="card-text"><strong>Fertile Window:</strong> {{ cycle.fertile_window_start }} → {{ cycle.fertile_window_end }}</p>
+                            <span class="period-badge">{{ cycle.last_period_date }}</span>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
